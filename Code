@@ -1,0 +1,110 @@
+import pandas as pd
+from matplotlib import pyplot as plt 
+
+
+df = pd.read_csv("smokers(1).csv")
+df = df.dropna()
+
+# STEP 1
+print("\nStep 1")
+print("========") 
+print("# of Surveys: ", len(df))
+
+# STEP 2
+print("\nStep 2")
+print("========") 
+
+avgStates = df.State.nunique()
+avgSurveys = df.groupby('State').count().mean()
+print("# of States:", avgStates)
+print("Average # of Surveys per State:", avgSurveys.Value)
+
+
+# STEP 3
+print("\nStep 3")
+print("========") 
+
+lowest = df.nsmallest(1, 'Value')
+print('\nMinimum Recorded Cigarette Use:')
+print("Year", lowest.iloc[0,0])
+print("State", lowest.iloc[0,1])
+print("Value", lowest.iloc[0,2]) 
+
+print('\nMaximum Recorded Cigarette Use:') 
+
+highest = df.nlargest(1, 'Value')
+print("Year", highest.iloc[0,0])
+print("State", highest.iloc[0,1])
+print("Value", highest.iloc[0,2]) 
+
+
+print("\nStep 4")
+print("========") 
+
+minGrouped = df.groupby(['State'])['Value'].mean().sort_values(ascending=True).reset_index().head(1)
+maxGrouped = df.groupby(['State'])['Value'].mean().sort_values(ascending=False).reset_index().head(1)
+
+print('\nLeast Cigarette Use State:')
+print(minGrouped.iloc[0,0], minGrouped.iloc[0,1])
+
+print('\nMost Cigarette Use State:')
+print(maxGrouped.iloc[0,0], maxGrouped.iloc[0,1])
+
+# STEP 5
+print("\nStep 5")
+print("========") 
+
+print('\nTop 10 Most Cigarette Use States: ')
+topGrouped = df.groupby(by = 'State').mean().sort_values('Value', ascending=False).head(10)
+print(topGrouped) 
+
+# STEP 6
+print("\nStep 6")
+print("========") 
+
+state = input("\nEnter State: ") 
+yr = int(input('Enter Year: '))
+userFiltered = df[(df.State == state) & (df.Year == yr)]
+print("Found", len(userFiltered), "surveys: ")
+print(userFiltered)
+
+# STEP 7
+print("\nStep 7")
+print("========")
+while True:
+     state = input("\nEnter State: ") 
+    
+     if state == "Exit" or state == 'exit':
+    
+          break  
+    
+     filtered = df[df.State == state]
+     year = filtered.iloc[:, 0].sort_values()
+     yList = filtered.iloc[:, 0].sort_values().tolist()
+    
+     yAxis = []
+    
+     for year in year:
+        
+        surveys = df[(df.State == state) & (df.Year == year)]
+        rates = surveys.iloc[:, 2]
+        avg = rates.agg('mean')
+        yAxis.append(avg)
+        
+     if yAxis[-1] > yAxis[-2]: 
+            
+        print("Cigarette use is on incline in", state) 
+    
+     else:
+        print("Cigarette use is on decline in", state)
+        
+   
+     plt.xlim([yList[0],yList[-1]])
+     plt.plot(yList, yAxis)
+     plt.show()
+     print("Compute for another state or enter 'Exit' to exit: ")
+     
+     
+    
+    
+print("bye bye!") 
